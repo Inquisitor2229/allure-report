@@ -19,8 +19,8 @@ def test_divide():
     with pytest.raises(ZeroDivisionError):
         calculator.divide(1, 0)
 
-def test_failure():
-    assert calculator.add(2, 2) == 5  # Intentional failure
+#def test_failure():
+#    assert calculator.add(2, 2) == 5  # Intentional failure
 
 if __name__ == "__main__":
     pytest.main(["--html=report.html"])
