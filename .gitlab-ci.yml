@@ -1,0 +1,46 @@
+stages:
+  - test
+  - report
+
+variables:
+  PYTHON_VERSION: "3.12"
+  ALLURE_RESULTS_DIR: allure-results
+  ALLURE_HISTORY_DIR: allure-history
+  REPORTS_DIR: reports
+
+before_script:
+  - pip install --upgrade pip
+
+test:
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  script:
+    - pip install -r test-requirements.txt
+    - pytest --alluredir=${ALLURE_RESULTS_DIR} --maxfail=5 --disable-warnings || true
+
+load_report_history:
+  stage: report
+  image: alpine:latest
+  script:
+    - |
+      git clone --branch gh-pages https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/your_username/your_project.git gh-pages || true
+    - mv gh-pages/${REPORTS_DIR}/* ${REPORTS_DIR}/ || true
+
+build_report:
+  stage: report
+  image: simple-elf/allure-report-action:latest
+  script:
+    - allure generate ${ALLURE_RESULTS_DIR} --clean --output ${ALLURE_HISTORY_DIR}
+    - mv ${ALLURE_HISTORY_DIR}/* ${REPORTS_DIR}/
+
+publish_report:
+  stage: report
+  script:
+    - |
+      git config --global user.email "youremail@example.com"
+      git config --global user.name "Your Name"
+      git add ${REPORTS_DIR}
+      git commit -m "Update Allure reports"
+      git push origin gh-pages
+  only:
+    - main
