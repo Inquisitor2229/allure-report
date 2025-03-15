@@ -23,12 +23,12 @@ load_report_history:
   image: alpine:latest
   script:
     - |
-      git clone --branch gh-pages https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/your_username/your_project.git gh-pages || true
+      git clone --branch gh-pages https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/volovyk.roman/allure-report.git gh-pages || true
     - mv gh-pages/${REPORTS_DIR}/* ${REPORTS_DIR}/ || true
 
 build_report:
   stage: report
-  image: simple-elf/allure-report-action:latest
+  image: frankescobar/allure-docker-service
   script:
     - allure generate ${ALLURE_RESULTS_DIR} --clean --output ${ALLURE_HISTORY_DIR}
     - mv ${ALLURE_HISTORY_DIR}/* ${REPORTS_DIR}/
