@@ -3,7 +3,7 @@ name: Run Tests and Generate Allure Report
 on:
   push:
     branches:
-      - "**"  # Runs on all branches
+      - main
 
 permissions: write-all
 
@@ -27,50 +27,22 @@ jobs:
         run: |
           pytest --alluredir=allure-results --maxfail=5 --disable-warnings || true
 
-      - name: Load existing gh-pages branch
+      - name: Load test report history
         uses: actions/checkout@v4
         if: always()
+        continue-on-error: true
         with:
           ref: gh-pages
           path: gh-pages
 
-      - name: Ensure branch subfolder and status.txt exist
-        run: |
-          mkdir -p allure-history/${{ github.ref_name }}/latest/
-          touch allure-history/${{ github.ref_name }}/status.txt  # Create empty status file if missing
-
-      - name: Build Allure report
+      - name: Build test report
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
           gh_pages: gh-pages
-          allure_history: allure-history/${{ github.ref_name }}
+          allure_history: allure-history
           allure_results: allure-results
-
-      - name: Determine test status
-        run: |
-          STATUS_FILE="allure-history/${{ github.ref_name }}/latest/widgets/summary.json"
-          STATUS_PATH="allure-history/${{ github.ref_name }}/status.txt"
-
-          if [ ! -f "$STATUS_FILE" ]; then
-            echo "⚠️ No Results" > "$STATUS_PATH"
-          else
-            FAILED_TESTS=$(jq -r '.statistic.failed' "$STATUS_FILE")
-            if [ "$FAILED_TESTS" -eq "0" ]; then
-              echo "✅ Passed" > "$STATUS_PATH"
-            else
-              echo "❌ Failed" > "$STATUS_PATH"
-            fi
-          fi
-
-      - name: Update main index.html
-        run: |
-          echo "<html><body><h1>Branch Test Status</h1><ul>" > index.html
-          for branch in $(ls allure-history); do
-            STATUS=$(cat allure-history/$branch/status.txt || echo "⚠️ Unknown")
-            echo "<li><a href='allure-history/$branch/latest/index.html'>$branch</a> - $STATUS</li>" >> index.html
-          done
-          echo "</ul></body></html>" >> index.html
+          subfolder: ${{ github.ref_name }}
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
@@ -78,4 +50,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: gh-pages
+          publish_dir: allure-history
