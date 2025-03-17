@@ -45,20 +45,12 @@ jobs:
           allure_results: allure-results
           subfolder: ${{ github.ref_name }}
 
-      - name: Determine test status
+      - name: Replace run numbers on GitHub Pagesindex.html
         run: |
-          STATUS_FILE="allure-history/${{ github.ref_name }}/${{github.run_number}}/status.txt"
-          LATEST_RESULT="allure-history/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json"
-          
-          if [ ! -f $LATEST_RESULT ]; then
-            echo "1" > "$STATUS_FILE"
-          else
-            FAILED_TESTS=$(jq -r '.statistic.failed' $LATEST_RESULT)
-            if [ "$FAILED_TESTS" -eq "0" ]; then
-              echo "0" > "$STATUS_FILE"
-            else
-              echo "1" > "$STATUS_FILE"
-            fi
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            sed -i "s/MAIN_RUN_NUMBER_PLACEHOLDER/${{ github.run_number }}/g" gh-pages/index.html
+          elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+            sed -i "s/MAIN_RUN_NUMBER_PLACEHOLDER/0/g" gh-pages/index.html
           fi
 
       - name: Publish test report
