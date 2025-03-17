@@ -47,38 +47,16 @@ jobs:
 
       - name: Determine test status
         run: |
-          if [ ! -f "allure-history/${{ github.ref_name }}/last-history/widgets/history.json" ]; then
+          if [ ! -f "/allure-history/${{ github.ref_name }}/last-history/history.json" ]; then
             echo "⚠️ No Results" > "$STATUS_PATH"
           else
-            FAILED_TESTS=$(jq -r '.statistic.failed' "allure-history/${{ github.ref_name }}/last-history/widgets/history.json")
+            FAILED_TESTS=$(jq -r '.statistic.failed' "/allure-history/${{ github.ref_name }}/last-history/history.json")
             if [ "$FAILED_TESTS" -eq "0" ]; then
               echo "✅ Passed" > "$STATUS_PATH"
             else
               echo "❌ Failed" > "$STATUS_PATH"
             fi
           fi
-
-      - name: Update index.html
-        run: |
-          echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>" > index.html
-          echo "<title>Branch Test Status</title><style>" >> index.html
-          echo "body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }" >> index.html
-          echo ".container { display: flex; flex-direction: column; gap: 20px; align-items: center; } .row { display: flex; gap: 20px; justify-content: center; }" >> index.html
-          echo ".card { padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); width: 200px; text-align: center; background: white; }" >> index.html
-          echo ".status { font-weight: bold; padding: 5px; } .passed { color: green; } .failed { color: red; } .unknown { color: gray; }" >> index.html
-          echo "</style></head><body><h1>Branch Test Status</h1><div class='container'>" >> index.html
-
-          for branch in main dev; do
-            STATUS_FILE="allure-history/$branch/status.txt"
-            STATUS="⚠️ Unknown"
-            [ -f "$STATUS_FILE" ] && STATUS=$(cat "$STATUS_FILE")
-
-            echo "<div class='row'><h2>${branch^} Branch</h2></div>" >> index.html
-            echo "<div class='row'><div class='card'><h3>${branch^}</h3><p>Status: <span class='status'>$STATUS</span></p>" >> index.html
-            echo "<a href='allure-history/$branch/latest/index.html'>View Report</a></div></div>" >> index.html
-          done
-
-          echo "</div></body></html>" >> index.html
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
