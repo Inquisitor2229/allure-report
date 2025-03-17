@@ -1,5 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","0","test_divide","","Sat Mar 15 17:50:22 GMT 2025","passed","Sat Mar 15 17:50:22 GMT 2025","","test_calculator","",""
-"","0","test_subtract","","Sat Mar 15 17:50:22 GMT 2025","passed","Sat Mar 15 17:50:22 GMT 2025","","test_calculator","",""
-"","1","test_add","","Sat Mar 15 17:50:22 GMT 2025","passed","Sat Mar 15 17:50:22 GMT 2025","","test_calculator","",""
-"","0","test_multiply","","Sat Mar 15 17:50:22 GMT 2025","passed","Sat Mar 15 17:50:22 GMT 2025","","test_calculator","",""
