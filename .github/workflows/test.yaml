@@ -60,6 +60,7 @@ jobs:
               echo "1" > "$STATUS_FILE"
             fi
           fi
+          
           ls -lah gh-pages/${{ github.ref_name }}
           cat gh-pages/${{ github.ref_name }}/status.txt
 
