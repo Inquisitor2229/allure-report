@@ -47,6 +47,7 @@ jobs:
 
       - name: Determine test status
         run: |
+          ls -lah *
           STATUS_FILE="allure-history/${{ github.ref_name }}/${{github.run_number}}/status.txt"
 
           if [ ! -f "allure-history/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json" ]; then
