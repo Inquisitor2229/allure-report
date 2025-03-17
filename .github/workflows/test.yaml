@@ -52,6 +52,7 @@ jobs:
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
             sed -i "s/MAIN_RUN_NUMBER_PLACEHOLDER/0/g" gh-pages/index.html
           fi
+          cat gh-pages/index.html
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
