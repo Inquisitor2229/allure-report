@@ -47,7 +47,7 @@ jobs:
 
       - name: Determine test status
         run: |
-          STATUS_FILE="gh-pages/allure-history/${{ github.ref_name }}/status.txt"
+          STATUS_FILE="allure-history/${{ github.ref_name }}/${{github.run_number}}/status.txt"
           LATEST_RESULT="gh-pages/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json"
 
           if [ ! -f $LATEST_RESULT ]; then
