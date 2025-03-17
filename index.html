@@ -44,11 +44,15 @@
     <script>
         const branches = ['main', 'dev'];
         const tableBody = document.getElementById('statusTable').getElementsByTagName('tbody')[0];
-        const currentBranch = window.location.pathname.split('/')[1];
-        const currentRun = window.location.pathname.split('/')[2];
 
         branches.forEach(branch => {
-            fetch(`https://inquisitor2229.github.io/allure-report/${branch}/${currentRun}/widgets/summary.json`)
+            let runNumber = '';
+            if (branch === 'main') {
+                runNumber = document.getElementById('mainRunNumber').textContent;
+            } else if (branch === 'dev') {
+                runNumber = document.getElementById('devRunNumber').textContent;
+            }
+            fetch(`allure-history/<span class="math-inline">\{branch\}/</span>{runNumber}/widgets/summary.json`)
                 .then(response => response.json())
                 .then(data => {
                     let row = tableBody.insertRow();
@@ -67,7 +71,7 @@
                         cellStatus.textContent = 'Unknown';
                         cellStatus.classList.add('unknown')
                     }
-                    cellLink.innerHTML = `<a href="https://inquisitor2229.github.io/allure-report/${branch}/${currentRun}/index.html">View Report</a>`;
+                    cellLink.innerHTML = `<a href="allure-history/<span class="math-inline">\{branch\}/</span>{runNumber}/index.html">View Report</a>`;
                 })
                 .catch(error => {
                     console.error(`Error fetching summary for ${branch}:`, error);
@@ -83,5 +87,7 @@
         });
 
     </script>
+    <span id="mainRunNumber" style="display: none;">MAIN_RUN_NUMBER_PLACEHOLDER</span>
+    <span id="devRunNumber" style="display: none;">DEV_RUN_NUMBER_PLACEHOLDER</span>
 </body>
 </html>
