@@ -3,7 +3,7 @@ name: Run Tests and Generate Allure Report
 on:
   push:
     branches:
-      - main
+      - "**"  # Runs on all branches
 
 permissions: write-all
 
@@ -43,10 +43,33 @@ jobs:
           allure_history: allure-history
           allure_results: allure-results
 
+      - name: Determine test status
+        run: |
+          STATUS_FILE="allure-history/${{ github.ref_name }}/latest/widgets/summary.json"
+          if [ -f "$STATUS_FILE" ]; then
+            FAILED_TESTS=$(jq -r '.statistic.failed' $STATUS_FILE)
+            if [ "$FAILED_TESTS" -eq "0" ]; then
+              echo "✅ Passed" > gh-pages/allure-history/${{ github.ref_name }}/status.txt
+            else
+              echo "❌ Failed" > gh-pages/allure-history/${{ github.ref_name }}/status.txt
+            fi
+          else
+            echo "⚠️ No Results" > gh-pages/allure-history/${{ github.ref_name }}/status.txt
+          fi
+
+      - name: Update main index.html
+        run: |
+          echo "<html><body><h1>Branch Test Status</h1><ul>" > gh-pages/index.html
+          for branch in $(ls gh-pages/allure-history); do
+            STATUS=$(cat gh-pages/allure-history/$branch/status.txt)
+            echo "<li><a href='allure-history/$branch/latest/index.html'>$branch</a> - $STATUS</li>" >> gh-pages/index.html
+          done
+          echo "</ul></body></html>" >> gh-pages/index.html
+
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
+          publish_dir: gh-pages
