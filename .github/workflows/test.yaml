@@ -47,13 +47,13 @@ jobs:
 
       - name: Determine test status
         run: |
-          ls -lah *
-          STATUS_FILE="allure-history/${{ github.ref_name }}/${{github.run_number}}/status.txt"
+          STATUS_FILE="gh-pages/${{ github.ref_name }}/${{github.run_number}}/status.txt"
+          LATEST_RESULT="gh-pages/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json"
 
-          if [ ! -f "allure-history/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json" ]; then
+          if [ ! -f $LATEST_RESULT ]; then
             echo "1" > "$STATUS_FILE"
           else
-            FAILED_TESTS=$(jq -r '.statistic.failed' "allure-history/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json")
+            FAILED_TESTS=$(jq -r '.statistic.failed' $LATEST_RESULT)
             if [ "$FAILED_TESTS" -eq "0" ]; then
               echo "0" > "$STATUS_FILE"
             else
