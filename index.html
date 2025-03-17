@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Test Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 200px;
+            text-align: center;
+        }
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .passed {
+            color: green;
+        }
+        .failed {
+            color: red;
+        }
+        .unknown {
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Branch Test Status</h1>
+
+    <div class="container">
+        
+        <!-- Main Branch Row -->
+        <div class="row">
+            <h2>Main Branch</h2>
+        </div>
+        <div class="row">
+            <div class="card">
+                <h3>Main</h3>
+                <p>Status: <span id="status-main" class="status unknown">Loading...</span></p>
+                <a href="https://inquisitor2229.github.io/allure-report/main/">View Report</a>
+            </div>
+        </div>
+
+        <!-- Dev Branch Row -->
+        <div class="row">
+            <h2>Dev Branch</h2>
+        </div>
+        <div class="row">
+            <div class="card">
+                <h3>Dev</h3>
+                <p>Status: <span id="status-dev" class="status unknown">Loading...</span></p>
+                <a href="https://inquisitor2229.github.io/allure-report/dev/">View Report</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function fetchStatus(branch, elementId) {
+            try {
+                const response = await fetch(`allure-history/${branch}/status.txt`);
+                if (!response.ok) throw new Error("Status not found");
+                const status = await response.text();
+                
+                let statusElement = document.getElementById(elementId);
+                statusElement.textContent = status.trim();
+                
+                if (status.includes("✅")) statusElement.classList.add("passed");
+                else if (status.includes("❌")) statusElement.classList.add("failed");
+                else statusElement.classList.add("unknown");
+
+            } catch (error) {
+                console.error(`Error loading ${branch} status:`, error);
+            }
+        }
+
+        fetchStatus("main", "status-main");
+        fetchStatus("dev", "status-dev");
+    </script>
+
+</body>
+</html>
