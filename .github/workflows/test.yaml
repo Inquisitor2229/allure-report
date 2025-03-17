@@ -27,46 +27,50 @@ jobs:
         run: |
           pytest --alluredir=allure-results --maxfail=5 --disable-warnings || true
 
-      - name: Load test report history
+      - name: Load existing gh-pages branch
         uses: actions/checkout@v4
         if: always()
-        continue-on-error: true
         with:
           ref: gh-pages
           path: gh-pages
 
-      - name: Build test report
+      - name: Ensure branch subfolder and status.txt exist
+        run: |
+          mkdir -p allure-history/${{ github.ref_name }}/latest/
+          touch allure-history/${{ github.ref_name }}/status.txt  # Create empty status file if missing
+
+      - name: Build Allure report
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
           gh_pages: gh-pages
-          allure_history: allure-history
+          allure_history: allure-history/${{ github.ref_name }}
           allure_results: allure-results
 
       - name: Determine test status
         run: |
-          STATUS_FILE="gh-pages/allure-history/${{ github.ref_name }}/latest/widgets/summary.json"
-          STATUS_PATH="gh-pages/allure-history/${{ github.ref_name }}/status.txt"
+          STATUS_FILE="allure-history/${{ github.ref_name }}/latest/widgets/summary.json"
+          STATUS_PATH="allure-history/${{ github.ref_name }}/status.txt"
 
-          if [ -f "$STATUS_FILE" ]; then
+          if [ ! -f "$STATUS_FILE" ]; then
+            echo "⚠️ No Results" > "$STATUS_PATH"
+          else
             FAILED_TESTS=$(jq -r '.statistic.failed' "$STATUS_FILE")
             if [ "$FAILED_TESTS" -eq "0" ]; then
               echo "✅ Passed" > "$STATUS_PATH"
             else
               echo "❌ Failed" > "$STATUS_PATH"
             fi
-          else
-            echo "⚠️ No Results" > "$STATUS_PATH"
           fi
 
       - name: Update main index.html
         run: |
-          echo "<html><body><h1>Branch Test Status</h1><ul>" > gh-pages/index.html
-          for branch in $(ls gh-pages/allure-history); do
-            STATUS=$(cat gh-pages/allure-history/$branch/status.txt || echo "⚠️ Unknown")
-            echo "<li><a href='allure-history/$branch/latest/index.html'>$branch</a> - $STATUS</li>" >> gh-pages/index.html
+          echo "<html><body><h1>Branch Test Status</h1><ul>" > index.html
+          for branch in $(ls allure-history); do
+            STATUS=$(cat allure-history/$branch/status.txt || echo "⚠️ Unknown")
+            echo "<li><a href='allure-history/$branch/latest/index.html'>$branch</a> - $STATUS</li>" >> index.html
           done
-          echo "</ul></body></html>" >> gh-pages/index.html
+          echo "</ul></body></html>" >> index.html
 
       - name: Commit & Push Changes
         run: |
