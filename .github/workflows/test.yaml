@@ -47,6 +47,7 @@ jobs:
 
       - name: Replace run numbers on GitHub Pages index.html
         run: |
+          whoami
           ls -lah allure-history
           cat allure-history/index.html
           if [[ "${{ github.ref_name }}" == "main" ]]; then
