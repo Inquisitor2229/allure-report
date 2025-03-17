@@ -43,33 +43,6 @@ jobs:
           allure_history: allure-history
           allure_results: allure-results
 
-      - name: Ensure directory exists
-        run: mkdir -p allure-history/${{ github.ref_name }}/latest/
-
-      - name: Determine test status
-        run: |
-          STATUS_FILE="allure-history/${{ github.ref_name }}/latest/widgets/summary.json"
-          STATUS_PATH="allure-history/${{ github.ref_name }}/status.txt"
-
-          if [ -f "$STATUS_FILE" ]; then
-            FAILED_TESTS=$(jq -r '.statistic.failed' "$STATUS_FILE")
-            if [ "$FAILED_TESTS" -eq "0" ]; then
-              echo "✅ Passed" > "$STATUS_PATH"
-            else
-              echo "❌ Failed" > "$STATUS_PATH"
-            fi
-          else
-            echo "⚠️ No Results" > "$STATUS_PATH"
-          fi
-
-      - name: Update main index.html
-        run: |
-          echo "<html><body><h1>Branch Test Status</h1><ul>" > gh-pages/index.html
-          for branch in $(ls gh-pages/allure-history); do
-            STATUS=$(cat gh-pages/allure-history/$branch/status.txt || echo "⚠️ Unknown")
-            echo "<li><a href='allure-history/$branch/latest/index.html'>$branch</a> - $STATUS</li>" >> gh-pages/index.html
-          done
-          echo "</ul></body></html>" >> gh-pages/index.html
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
@@ -77,4 +50,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: gh-pages
+          publish_dir: gh-pages/${{ github.ref_name }}
