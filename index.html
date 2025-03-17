@@ -44,9 +44,11 @@
     <script>
         const branches = ['main', 'dev'];
         const tableBody = document.getElementById('statusTable').getElementsByTagName('tbody')[0];
+        const currentBranch = window.location.pathname.split('/')[1];
+        const currentRun = window.location.pathname.split('/')[2];
 
         branches.forEach(branch => {
-            fetch(`https://inquisitor2229.github.io/allure-report/${branch}/${getLatestRun(branch)}/widgets/summary.json`)
+            fetch(`https://inquisitor2229.github.io/allure-report/${branch}/${currentRun}/widgets/summary.json`)
                 .then(response => response.json())
                 .then(data => {
                     let row = tableBody.insertRow();
@@ -65,7 +67,7 @@
                         cellStatus.textContent = 'Unknown';
                         cellStatus.classList.add('unknown')
                     }
-                    cellLink.innerHTML = `<a href="https://inquisitor2229.github.io/allure-report/${branch}/${getLatestRun(branch)}/index.html">View Report</a>`;
+                    cellLink.innerHTML = `<a href="https://inquisitor2229.github.io/allure-report/${branch}/${currentRun}/index.html">View Report</a>`;
                 })
                 .catch(error => {
                     console.error(`Error fetching summary for ${branch}:`, error);
@@ -79,30 +81,6 @@
                     cellLink.textContent = 'N/A';
                 });
         });
-        function getLatestRun(branch){
-            let latestRun = 1;
-            fetch(`https://inquisitor2229.github.io/allure-report/${branch}/`)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const links = doc.querySelectorAll('a');
-                    let runs = [];
-                    links.forEach(link => {
-                        const href = link.getAttribute('href');
-                        if (href && !isNaN(parseInt(href))) {
-                            runs.push(parseInt(href));
-                        }
-                    });
-                    if(runs.length > 0){
-                        latestRun = Math.max(...runs);
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error fetching branch folder:`, error);
-                });
-            return latestRun;
-        }
 
     </script>
 </body>
