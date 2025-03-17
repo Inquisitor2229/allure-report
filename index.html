@@ -1,111 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Branch Test Status</title>
+    <title>Test Status</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
         }
-        h1 {
-            color: #333;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+        th {
+            background-color: #f2f2f2;
         }
-        .row {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
+        .success {
+            background-color: #d4edda;
         }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 200px;
-            text-align: center;
-        }
-        .status {
-            font-size: 18px;
-            font-weight: bold;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        .passed {
-            color: green;
-        }
-        .failed {
-            color: red;
+        .failure {
+            background-color: #f8d7da;
         }
         .unknown {
-            color: gray;
+            background-color: #ffffcc;
         }
     </style>
 </head>
 <body>
-
-    <h1>Branch Test Status</h1>
-
-    <div class="container">
-        
-        <!-- Main Branch Row -->
-        <div class="row">
-            <h2>Main Branch</h2>
-        </div>
-        <div class="row">
-            <div class="card">
-                <h3>Main</h3>
-                <p>Status: <span id="status-main" class="status unknown">Loading...</span></p>
-                <a href="https://inquisitor2229.github.io/allure-report/main/">View Report</a>
-            </div>
-        </div>
-
-        <!-- Dev Branch Row -->
-        <div class="row">
-            <h2>Dev Branch</h2>
-        </div>
-        <div class="row">
-            <div class="card">
-                <h3>Dev</h3>
-                <p>Status: <span id="status-dev" class="status unknown">Loading...</span></p>
-                <a href="https://inquisitor2229.github.io/allure-report/dev/">View Report</a>
-            </div>
-        </div>
-
-    </div>
+    <h1>Test Status</h1>
+    <table id="statusTable">
+        <thead>
+            <tr>
+                <th>Branch</th>
+                <th>Status</th>
+                <th>Report Link</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 
     <script>
-        async function fetchStatus(branch, elementId) {
-            try {
-                const response = await fetch(`allure-history/${branch}/status.txt`);
-                if (!response.ok) throw new Error("Status not found");
-                const status = await response.text();
-                
-                let statusElement = document.getElementById(elementId);
-                statusElement.textContent = status.trim();
-                
-                if (status.includes("✅")) statusElement.classList.add("passed");
-                else if (status.includes("❌")) statusElement.classList.add("failed");
-                else statusElement.classList.add("unknown");
+        const branches = ['main', 'dev'];
+        const tableBody = document.getElementById('statusTable').getElementsByTagName('tbody')[0];
 
-            } catch (error) {
-                console.error(`Error loading ${branch} status:`, error);
-            }
+        branches.forEach(branch => {
+            fetch(`https://inquisitor2229.github.io/allure-report/${branch}/${getLatestRun(branch)}/widgets/summary.json`)
+                .then(response => response.json())
+                .then(data => {
+                    let row = tableBody.insertRow();
+                    let cellBranch = row.insertCell(0);
+                    let cellStatus = row.insertCell(1);
+                    let cellLink = row.insertCell(2);
+
+                    cellBranch.textContent = branch;
+                    if (data.statistic.failed === 0 && data.statistic.broken === 0 && data.statistic.skipped === 0) {
+                        cellStatus.textContent = 'Success';
+                        cellStatus.classList.add('success');
+                    } else if (data.statistic.failed > 0 || data.statistic.broken > 0) {
+                        cellStatus.textContent = 'Failure';
+                        cellStatus.classList.add('failure');
+                    } else {
+                        cellStatus.textContent = 'Unknown';
+                        cellStatus.classList.add('unknown')
+                    }
+                    cellLink.innerHTML = `<a href="https://inquisitor2229.github.io/allure-report/${branch}/${getLatestRun(branch)}/index.html">View Report</a>`;
+                })
+                .catch(error => {
+                    console.error(`Error fetching summary for ${branch}:`, error);
+                    let row = tableBody.insertRow();
+                    let cellBranch = row.insertCell(0);
+                    let cellStatus = row.insertCell(1);
+                    let cellLink = row.insertCell(2);
+
+                    cellBranch.textContent = branch;
+                    cellStatus.textContent = 'N/A';
+                    cellLink.textContent = 'N/A';
+                });
+        });
+        function getLatestRun(branch){
+            let latestRun = 1;
+            fetch(`https://inquisitor2229.github.io/allure-report/${branch}/`)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const links = doc.querySelectorAll('a');
+                    let runs = [];
+                    links.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && !isNaN(parseInt(href))) {
+                            runs.push(parseInt(href));
+                        }
+                    });
+                    if(runs.length > 0){
+                        latestRun = Math.max(...runs);
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error fetching branch folder:`, error);
+                });
+            return latestRun;
         }
 
-        fetchStatus("main", "status-main");
-        fetchStatus("dev", "status-dev");
     </script>
-
 </body>
 </html>
