@@ -50,8 +50,9 @@ jobs:
           if [[ "${{ github.ref_name }}" == "main" ]]; then
             sed -i "s/MAIN_RUN_NUMBER_PLACEHOLDER/${{ github.run_number }}/g" gh-pages/index.html
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-            sed -i "s/MAIN_RUN_NUMBER_PLACEHOLDER/0/g" gh-pages/index.html
+            sed -i "s/DEV_RUN_NUMBER_PLACEHOLDER/${{ github.run_number }}/g" gh-pages/index.html
           fi
+
           cat gh-pages/index.html
 
       - name: Publish test report
