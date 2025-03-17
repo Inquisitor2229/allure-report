@@ -1,93 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test Status</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .success {
-            background-color: #d4edda;
-        }
-        .failure {
-            background-color: #f8d7da;
-        }
-        .unknown {
-            background-color: #ffffcc;
-        }
-    </style>
+    <title>Allure Reports</title>
 </head>
 <body>
-    <h1>Test Status</h1>
-    <table id="statusTable">
-        <thead>
-            <tr>
-                <th>Branch</th>
-                <th>Status</th>
-                <th>Report Link</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-
-    <script>
-        const branches = ['main', 'dev'];
-        const tableBody = document.getElementById('statusTable').getElementsByTagName('tbody')[0];
-
-        branches.forEach(branch => {
-            let runNumber = '';
-            if (branch === 'main') {
-                runNumber = document.getElementById('mainRunNumber').textContent;
-            } else if (branch === 'dev') {
-                runNumber = document.getElementById('devRunNumber').textContent;
-            }
-            fetch(`allure-history/<span class="math-inline">\{branch\}/</span>{runNumber}/widgets/summary.json`)
-                .then(response => response.json())
-                .then(data => {
-                    let row = tableBody.insertRow();
-                    let cellBranch = row.insertCell(0);
-                    let cellStatus = row.insertCell(1);
-                    let cellLink = row.insertCell(2);
-
-                    cellBranch.textContent = branch;
-                    if (data.statistic.failed === 0 && data.statistic.broken === 0 && data.statistic.skipped === 0) {
-                        cellStatus.textContent = 'Success';
-                        cellStatus.classList.add('success');
-                    } else if (data.statistic.failed > 0 || data.statistic.broken > 0) {
-                        cellStatus.textContent = 'Failure';
-                        cellStatus.classList.add('failure');
-                    } else {
-                        cellStatus.textContent = 'Unknown';
-                        cellStatus.classList.add('unknown')
-                    }
-                    cellLink.innerHTML = `<a href="allure-history/<span class="math-inline">\{branch\}/</span>{runNumber}/index.html">View Report</a>`;
-                })
-                .catch(error => {
-                    console.error(`Error fetching summary for ${branch}:`, error);
-                    let row = tableBody.insertRow();
-                    let cellBranch = row.insertCell(0);
-                    let cellStatus = row.insertCell(1);
-                    let cellLink = row.insertCell(2);
-
-                    cellBranch.textContent = branch;
-                    cellStatus.textContent = 'N/A';
-                    cellLink.textContent = 'N/A';
-                });
-        });
-
-    </script>
-    <span id="mainRunNumber" style="display: none;">MAIN_RUN_NUMBER_PLACEHOLDER</span>
-    <span id="devRunNumber" style="display: none;">DEV_RUN_NUMBER_PLACEHOLDER</span>
+    <h1>Allure Reports by Branch</h1>
+    <ul>
+        <li><a href="https://inquisitor2229.github.io/allure-report/dev/">Develop Branch</a></li>
+        <li><a href="https://inquisitor2229.github.io/allure-report/main/">Main Branch</a></li>
+    </ul>
 </body>
 </html>
