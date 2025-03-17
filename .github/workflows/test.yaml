@@ -48,9 +48,8 @@ jobs:
       - name: Determine test status
         run: |
           STATUS_FILE="allure-history/${{ github.ref_name }}/${{github.run_number}}/status.txt"
-          LATEST_RESULT="gh-pages/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json"
-          ls -lah allure-history/${{ github.ref_name }}/${{github.run_number}}
-          ls -lah gh-pages/${{ github.ref_name }}/${{github.run_number}}
+          LATEST_RESULT="allure-history/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json"
+          
           if [ ! -f $LATEST_RESULT ]; then
             echo "1" > "$STATUS_FILE"
           else
