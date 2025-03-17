@@ -47,13 +47,13 @@ jobs:
 
       - name: Replace run numbers on GitHub Pages index.html
         run: |
+          ls -lah allure-history
+          cat allure-history/index.html
           if [[ "${{ github.ref_name }}" == "main" ]]; then
             sed -i "s/MAIN_RUN_NUMBER_PLACEHOLDER/${{ github.run_number }}/g" allure-history/index.html
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
             sed -i "s/DEV_RUN_NUMBER_PLACEHOLDER/${{ github.run_number }}/g" allure-history/index.html
           fi
-
-          cat allure-history/index.html
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
