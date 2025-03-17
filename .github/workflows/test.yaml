@@ -47,6 +47,7 @@ jobs:
 
       - name: Determine test status
         run: |
+          ls -lah gh-pages/*
           STATUS_FILE="gh-pages/${{ github.ref_name }}/${{github.run_number}}/status.txt"
           touch $STATUS_FILE
           LATEST_RESULT="gh-pages/${{ github.ref_name }}/${{github.run_number}}/widgets/summary.json"
