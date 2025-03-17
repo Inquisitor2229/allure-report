@@ -47,14 +47,10 @@ jobs:
 
       - name: Determine test status
         run: |
-          STATUS_FILE="allure-history/${{ github.ref_name }}/latest/widgets/summary.json"
-          touch allure-history/${{ github.ref_name }}/status.txt
-          STATUS_PATH="allure-history/${{ github.ref_name }}/status.txt"
-
-          if [ ! -f "$STATUS_FILE" ]; then
+          if [ ! -f "/allure-history/${{ github.ref_name }}/last-history/widgets/summary.json" ]; then
             echo "⚠️ No Results" > "$STATUS_PATH"
           else
-            FAILED_TESTS=$(jq -r '.statistic.failed' "$STATUS_FILE")
+            FAILED_TESTS=$(jq -r '.statistic.failed' "/allure-history/${{ github.ref_name }}/last-history/widgets/summary.json")
             if [ "$FAILED_TESTS" -eq "0" ]; then
               echo "✅ Passed" > "$STATUS_PATH"
             else
